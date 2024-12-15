@@ -5,7 +5,7 @@ from tkinter import ttk         # Themed Tkinter Widgets (combobox)
 from textwrap import wrap       # Wrapping long text into multiple lines
 import climateDatabase          # import database python file
 
-# Defining colors
+# Defining colors (You can change the value to match your preferences)
 colors = {
     "text": "#050606",          # Text Color (black)
     "background": "#f6fafa",    # Background Color
@@ -14,7 +14,7 @@ colors = {
     "accent": "#42f7fe",        # Accent color (lightest)
     "gray": "#333334",          # Lightgray Text Color
 }
-# Climate Learning and Informative Management for Atmospheric Typhoons and Events CLIMATE
+# Climate Learning and Informative Management for Atmospheric Typhoons and Events (CLIMATE)
 # Log In Window
 class logIn:
     def __init__(self, window):
@@ -469,7 +469,7 @@ class Climate:
             elif messagebox.askyesno('Confirmation','Are you sure you want to add 10 Typhoons from database?'):
                 messagebox.showinfo("Success!", "Succesfully added the typhoon with 20 typhoon!")
                 climateDatabase.populateTyphoon()
-                self.article()
+                self.typhoon()
             else: messagebox.showwarning('Cancelled', 'FAILED TO ADD 20 TYPHOONS')
         # Display Typhoon
         def displayTyphoon(typhoonData):
@@ -663,19 +663,20 @@ class Climate:
     # ========================================= ARTICLE WINDOW ========================================= 
     def editArticle(self):
         self.new_window = Toplevel(self.window)
-        Article(self.new_window, self.userData)
+        Article(self.new_window, self.userData, self)
     # ========================================= TYPHOON WINDOW ========================================= 
     def editTyphoon(self):
         self.new_window = Toplevel(self.window)
-        Typhoon(self.new_window, self.userData)
+        Typhoon(self.new_window, self.userData, self)
 
 # Edit Article Window
 class Article():
-    def __init__(self, window, userData):
+    def __init__(self, window, userData, climate_instance):
         self.window = window
         self.window.geometry("500x550+600+80") # size of the window
         self.window.config(bg=colors['primary']) # background color of the window
         self.window.overrideredirect(True) # User not able to move the window
+        self.climate_instance = climate_instance
         # User Data
         self.userData = userData  # Store userData
         # Input Fields
@@ -717,6 +718,7 @@ class Article():
             if messagebox.askyesno('Confirmation','Are you sure you want to ADD this ARTICLE?'):
                 climateDatabase.addArticle(self.userData[0], title, content)
                 messagebox.showinfo("Success!", "Article Added Succesfully")
+                self.climate_instance.article()
                 self.window.destroy()
             else: 
                 messagebox.showwarning('Cancelled', 'FAILED TO ADD AN ARTICLE')
@@ -734,6 +736,7 @@ class Article():
             if messagebox.askyesno('Confirmation','Are you sure you want to DELETE this ARTICLE?'):
                 climateDatabase.deleteArticle(article_id)
                 messagebox.showinfo("Success!", "Article Deleted Succesfully")
+                self.climate_instance.article()
                 self.window.destroy()
             else: 
                 messagebox.showwarning('Cancelled', 'FAILED TO DELETE ARTICLE')
@@ -750,6 +753,7 @@ class Article():
             if messagebox.askyesno('Confirmation','Are you sure you want to update this Article?'):
                 climateDatabase.updateArticle(article_id, title, content)
                 messagebox.showinfo("Success!", "Article Updated Succesfully")
+                self.climate_instance.article()
                 self.window.destroy()
             else:
                 messagebox.showerror('Cancelled', 'FAILED TO UPDATE ARTICLE')
@@ -800,11 +804,12 @@ class Article():
 
 # Edit Typhoon Window
 class Typhoon():
-    def __init__(self, window, userData):
+    def __init__(self, window, userData, typhoon_instance):
         self.window = window
         self.window.geometry("400x400+600+150") # size of the window
         self.window.config(bg=colors['secondary']) # background color of the window
         self.window.overrideredirect(True) # User not able to move the window
+        self.typhoon_instance = typhoon_instance
         # User Data
         self.userData = userData  # Store userData
         # 10 limit characters
@@ -819,7 +824,7 @@ class Typhoon():
         self.name.grid(row=1, column=1, padx=20, pady=(10, 0))
         self.year = Entry(self.window, width=30, validate="key", validatecommand=(self.window.register(limitEntry), "%P"))
         self.year.grid(row=2, column=1)
-        self.affectedAreas = Entry(self.window, width=30, validate="key", validatecommand=(self.window.register(limitEntry), "%P"))
+        self.affectedAreas = Entry(self.window, width=30)
         self.affectedAreas.grid(row=3, column=1)
         self.windSpeed = Entry(self.window, width=30, validate="key", validatecommand=(self.window.register(limitEntry), "%P"))
         self.windSpeed.grid(row=4, column=1)
@@ -864,8 +869,9 @@ class Typhoon():
             if messagebox.askyesno('Confirmation','Are you sure you want to ADD this TYPHOON?'):
                 climateDatabase.addTyphoon(self.userData[0], name, year, affected, speed)
                 messagebox.showinfo("Success!", "Typhoon Added Succesfully")
+                self.typhoon_instance.typhoon()
                 self.window.destroy()
-            else: 
+            else:
                 messagebox.showwarning('Cancelled', 'FAILED TO ADD TYPHOON')
                 self.window.deiconify()
     # ================================================ DELETE TYPHOON ================================================
@@ -881,6 +887,7 @@ class Typhoon():
             if messagebox.askyesno('Confirmation','Are you sure you want to DELETE this TYPHOON?'):
                 climateDatabase.deleteTyphoon(typhoon_id)
                 messagebox.showinfo("Success!", "Typhoon Deleted Succesfully")
+                self.typhoon_instance.typhoon()
             else:
                 messagebox.showwarning('Cancelled', 'FAILED TO DELETE TYPHOON')
                 self.window.deiconify()
@@ -899,6 +906,7 @@ class Typhoon():
             if messagebox.askyesno('Confirmation','Are you sure you want to UPDATE this TYPHOON?'):
                 climateDatabase.updateTyphoon(typhoon_id, name, year, affected, speed)
                 messagebox.showinfo("Success!", "TYPHOON Updated Succesfully")
+                self.typhoon_instance.typhoon()
                 self.window.destroy()
             else:
                 messagebox.showwarning('Cancelled', 'FAILED TO UPDATE TYPHOON')
@@ -925,7 +933,7 @@ class Typhoon():
             messagebox.showerror("Invalid Input!", "ID MUST BE NUMERIC VALUE")
             self.window.deiconify()
         else:
-            if messagebox.askyesno('Confirmation','Are you sure you want to edit this Article?'):
+            if messagebox.askyesno('Confirmation','Are you sure you want to edit this Typhoon?'):
                 data = climateDatabase.searchTyphoon(typhoon_id)
                 for i, row in enumerate(data):
                     self.name.delete(0, END)
